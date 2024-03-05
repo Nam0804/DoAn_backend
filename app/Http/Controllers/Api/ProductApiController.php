@@ -35,6 +35,7 @@ class ProductApiController extends Controller
     public function getAllById($id,Request $request,)
     {
         $product = $this->product->getAllProductById($id,$request);
+
         if($product){
             return $this->success(
                 ProductResource::collection($product),

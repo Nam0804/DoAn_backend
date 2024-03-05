@@ -1,6 +1,8 @@
 <?php
+
 namespace App\Repository;
 
+use App\Models\Base;
 use App\Repository\Interface\ProductRepositoryInterface;
 use App\Models\Product;
 use App\Models\TypeOfMeat;
@@ -14,23 +16,26 @@ class ProductsRepository implements ProductRepositoryInterface
         $products = Product::all();
         return $products;
     }
-    public function getAllProductById($id,$request)
+    public function getAllProductById($id, $request)
     {
-        $tomid=$request->input('type_of_meat_id');
+        $tomid = $request->input('type_of_meat_id');
         //nếu không có request hoặc có request giá trị là 0 thì lấy tất cả sản phẩm thuộc $id
-        if($tomid==0 || !$tomid)
-        {
-            $final = Product::where('category_id',$id)->get();
-        }
-        else{
-            $result = TypeOfMeat::where('id',$tomid)->first();
-            if($result)
-            {
-                $final = $result->products->where('category_id',$id);
-            }
-            else
-            {
+        if ($tomid == 0 || !$tomid) {
+            $final = Product::where('category_id', $id)->get();
+        } else {
+            $result = TypeOfMeat::where('id', $tomid)->first();
+            if ($result) {
+                $final = $result->products->where('category_id', $id);
+            } else {
                 $final = [];
+            }
+        }
+        $bases = Base::all(['id', 'name']);
+        foreach ($final as $finalproduct) {
+            if ($finalproduct->category_id == 1) {
+                if ($finalproduct->bases->count() === 0) {
+                    $finalproduct->bases()->attach($bases->pluck('id')->toArray());
+                }
             }
         }
         return $final;
@@ -38,7 +43,7 @@ class ProductsRepository implements ProductRepositoryInterface
     public function storeProduct($request)
     {
         $name = null;
-        if($request->hasFile('image')){
+        if ($request->hasFile('image')) {
             $image = $request->file('image');
             $name = rand() . '.' . $image->getClientOriginalExtension();
             $image->move(public_path('/productimg'), $name);
@@ -50,8 +55,7 @@ class ProductsRepository implements ProductRepositoryInterface
         $product->price = $request->input('price');
         $product->image = $name;
         $product->save();
-        if($request->has('meats' || $request->input('meats')!=null))
-        {
+        if ($request->has('meats' || $request->input('meats') != null)) {
             $product->type_of_meats()->attach($request->input('meats'));
         }
         return $product;
@@ -62,8 +66,7 @@ class ProductsRepository implements ProductRepositoryInterface
         $product->delete();
         return $product;
     }
-    public function editProduct($request,$id)
+    public function editProduct($request, $id)
     {
-        
     }
 }

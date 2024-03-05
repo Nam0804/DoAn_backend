@@ -9,7 +9,7 @@ use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use Spatie\Permission\Traits\HasRoles;
 
-class User extends Authenticatable
+class Admin extends Authenticatable
 {
     use HasRoles;
     use HasApiTokens, HasFactory, Notifiable;
@@ -22,10 +22,7 @@ class User extends Authenticatable
     protected $fillable = [
         'name',
         'type',
-        'surname',
         'phone',
-        'user_agent',
-        'address',
         'email',
         'password',
 

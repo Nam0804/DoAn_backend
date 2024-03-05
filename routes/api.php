@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\CategoryApiController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -18,12 +19,15 @@ use App\Http\Controllers\Api\TypeOfMeatApiController;
 |
 */
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
-});
+// Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
+//     return $request->user();
+// });
 
 Route::get('products_by_id/{id}', [ProductApiController::class, 'getAllById']);
 Route::resource('products', ProductApiController::class);
 Route::resource('categories', CategoryApiController::class);
 Route::resource('typeofmeats', TypeOfMeatApiController::class);
 Route::resource('types', TypeApiController::class);
+
+Route::post('auth/register',[AuthController::class,'register']);
+Route::post('auth/login',[AuthController::class,'login']);

@@ -14,7 +14,7 @@ class ProductSizeSeeder extends Seeder
      */
     public function run()
     {
-        //seed the sizes table with 0 is small, 1 is medium, 2 is large
+        //seed the sizes table with 1 is small, 2 is medium, 3 is large
         $sizes = [
             ['name' => 'small'],
             ['name' => 'medium'],

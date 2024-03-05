@@ -3,6 +3,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\Pivot;
 
 class Product extends Model
 {
@@ -29,7 +30,19 @@ class Product extends Model
     {
         return $this->belongsToMany(Size::class, 'product_sizes')->withPivot('price');
     }
-    //relation to product_sizes no table
+    //relation many to many to base
+    public function bases()
+    {
+        return $this->belongsToMany(Base::class, 'product_bases', 'product_id', 'base_id');
+    }
+    public function toppings()
+    {
+        return $this->belongsToMany(Topping::class, 'product_toppings')->withPivot('size_id','price');
+    }
+    public function borders()
+    {
+        return $this->belongsToMany(Border::class, 'product_borders', 'product_id', 'border_id')->withPivot('size_id','price');
+    }
 }
 
 
