@@ -5,6 +5,10 @@ namespace App\Repository;
 use App\Models\Base;
 use App\Repository\Interface\ProductRepositoryInterface;
 use App\Models\Product;
+use App\Models\ProductBorder;
+use App\Models\ProductMeat;
+use App\Models\ProductSize;
+use App\Models\ProductTopping;
 use App\Models\TypeOfMeat;
 use Illuminate\Support\Facades\Request;
 use Mockery\Matcher\Type;
@@ -19,7 +23,6 @@ class ProductsRepository implements ProductRepositoryInterface
     public function getAllProductById($id, $request)
     {
         $tomid = $request->input('type_of_meat_id');
-        //nếu không có request hoặc có request giá trị là 0 thì lấy tất cả sản phẩm thuộc $id
         if ($tomid == 0 || !$tomid) {
             $final = Product::where('category_id', $id)->get();
         } else {
@@ -40,8 +43,14 @@ class ProductsRepository implements ProductRepositoryInterface
         }
         return $final;
     }
+    public function getProductById($id)
+    {
+        $product = Product::find($id);
+        return $product;
+    }
     public function storeProduct($request)
     {
+        try{
         $name = null;
         if ($request->hasFile('image')) {
             $image = $request->file('image');
@@ -52,13 +61,58 @@ class ProductsRepository implements ProductRepositoryInterface
         $product->name = $request->input('name');
         $product->description = $request->input('description');
         $product->category_id = $request->input('category_id');
+        $product->type_id = $request->input('type_id');
         $product->price = $request->input('price');
         $product->image = $name;
         $product->save();
-        if ($request->has('meats' || $request->input('meats') != null)) {
-            $product->type_of_meats()->attach($request->input('meats'));
+        //thông tin của sp mới thêm
+        $productId = $product->id;
+        if ($request->has('meats') && $request->input('meats') != null) {
+            $meats = json_decode($request->input('meats'), true);
+            foreach ($meats as $meatId) {
+                ProductMeat::create([
+                    'product_id' => $productId,
+                    'meat_id' => $meatId,
+                ]);
+            }
+        }
+        if($request->has('topping_list') && $request->input('topping_list') != null){
+            $toppingList = json_decode($request->input('topping_list'), true);
+            foreach ($toppingList as $topping) {
+                ProductTopping::create([
+                    'product_id' => $productId,
+                    'topping_id' => $topping['topping'],
+                    'size_id' => $topping['size'],
+                    'price' => $topping['price'],
+                ]);
+            }
+        }
+        if($request->has('border_list') && $request->input('border_list') != null){
+            $borderList = json_decode($request->input('border_list'), true);
+            foreach ($borderList as $border) {
+                ProductBorder::create([
+                    'product_id' => $productId,
+                    'border_id' => $border['border'],
+                    'size_id' => $border['size'],
+                    'price' => $border['price'],
+                ]);
+            }
+        }
+        if($request->has('size_list') && $request->input('size_list') != null){
+            $sizeList = json_decode($request->input('size_list'), true);
+            foreach ($sizeList as $size) {
+                ProductSize::create([
+                    'product_id' => $productId,
+                    'size_id' => $size['size'],
+                    'price' => $size['price'],
+                ]);
+            }
         }
         return $product;
+        }catch(\Exception $e){
+            dd($e);
+            return $e;
+        }
     }
     public function deleteProduct($id)
     {

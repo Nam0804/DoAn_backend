@@ -2,6 +2,7 @@
 
 namespace App\Repository;
 
+use App\Models\Admin;
 use App\Models\User;
 use App\Repository\Interface\BasePermissionsRepository;
 use Spatie\Permission\Models\Role;
@@ -13,9 +14,9 @@ class PermissionsRepository implements BasePermissionsRepository
     {
         return Permission::all();
     }
-    public function showPermissionByRole($user_id):\Illuminate\Support\Collection
+    public function showPermissionByRole($id):\Illuminate\Support\Collection
     {
-        $user = User::find($user_id);
+        $user = Admin::find($id);
         return $user->getAllPermissions();
     }
     public function updatePermissionByRole($role, array $permissions)

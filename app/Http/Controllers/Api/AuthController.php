@@ -20,8 +20,8 @@ class AuthController extends Controller
             'phone' => $request->phone,
             'password' => $request->password
         ];
-        if (Auth::guard('admin')->attempt($credentials)) {
-            $user = Admin::where('phone', $request->phone)->first();
+        if (Auth::guard('web')->attempt($credentials)) {
+            $user = User::where('phone', $request->phone)->first();
             $token = $user->createToken('login_token')->plainTextToken;
             return $this->success(
                 [
@@ -35,6 +35,19 @@ class AuthController extends Controller
             return $this->error(null, 404, 'User Not Logged In');
         }
     }
+    public function logout(Request $request)
+    {
+        if ($request->user()) {
+            try {
+                $request->user()->currentAccessToken()->delete();
+                return $this->success(null, 200, 'User Logged Out Successfully');
+            } catch (\Exception $e) {
+                return $this->error(null, 500, 'Error Logging Out');
+            }
+        } else {
+            return $this->error(null, 401, 'User Not Logged In');
+        }   
+    }
     public function register(StoreUserRequest $request)
     {
         //dd($request->all());
@@ -45,7 +58,7 @@ class AuthController extends Controller
             'phone' => $request->phone,
             'password' => Hash::make($request->password),
             'user_agent' => $request->user_agent,
-            'type' => $request->type,
+            //'type' => $request->type,
         ]);
         $token = $user->createToken('register_token')->plainTextToken;
         if ($user) {

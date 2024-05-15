@@ -43,6 +43,10 @@ class Product extends Model
     {
         return $this->belongsToMany(Border::class, 'product_borders', 'product_id', 'border_id')->withPivot('size_id','price');
     }
+    public function carts()
+    {
+        return $this->belongsTo(Cart::class);
+    }
 }
 
 

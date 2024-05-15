@@ -1,27 +1,46 @@
 <?php
-namespace App\Repository\UserRepository;
+
+namespace App\Repository;
+
+use App\Models\Admin;
 use App\Repository\Interface\BaseUserRepository;
+use Illuminate\Support\Facades\DB;
 
 class UserRepository implements BaseUserRepository
 {
     public function all()
     {
-        return 'all';
+        //kết hợp bảng admin với băng user để lấy ra tất cả thông tin
+        $allData = DB::table('admins')->get();
+        return $allData;
     }
     public function create(array $data)
     {
-        return 'create';
+        $user = new Admin();
+        $user->name = $data['name'];
+        $user->email = $data['email'];
+        $user->phone = $data['phone'];
+        $user->type = $data['type'];
+        $user->password = bcrypt($data['password']);
+        $user->address = $data['address'];
+        $user->save();
+        return $user;
     }
     public function update(array $data, $id)
     {
-        return 'update';
+        $user = Admin::findOrFail($id);
+        $user->update($data);
+        return $user;
     }
     public function delete($id)
     {
-        return 'delete';
+        $user = Admin::findOrFail($id);
+        $user->delete();
+        return $user;
     }
     public function show($id)
     {
-        return 'show';
+        return Admin::findOrFail($id);
     }
+    
 }

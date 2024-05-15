@@ -1,14 +1,17 @@
 <?php
 
-namespace App\Http\Controllers\Api;
+namespace App\Http\Controllers;
 
-use App\Models\User;
+use App\Http\Controllers\Controller;
+use App\Models\Admin;
 use App\Repository\PermissionsRepository;
 use App\Repository\RolesRepository;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
-class RolesAndPermissionsController
+use function PHPSTORM_META\type;
+
+class RolesAndPermissionsController extends Controller
 {
     private PermissionsRepository $permissionsRepository;
     private RolesRepository $rolesRepository;
@@ -37,38 +40,53 @@ class RolesAndPermissionsController
             'role' => $role
         ], $statusCode);
     }
-
-    // public function assignRole($user_type): \Illuminate\Http\JsonResponse
-    // {
-    //     /** 
-    //      * Bước 1: Trước khi chạy hàm assignRole cần chạy migrate db và sau đó chạy php artisan db:seed RolesAndPermissionsSeeder
-    //      * Bước 2: Pass user name vào trong hàm assignRole() để gán quyền cho user
-    //      * **/
-    //     try {
-    //         if($user_type == 0){
-    //             $this->rolesRepository->assignRole(0, 'admin');
-    //         }
-    //         if($user_type == 1){
-    //             $this->rolesRepository->assignRole(1, 'manager');
-    //         }
-    //         if($user_type == 2){
-    //             $this->rolesRepository->assignRole(2, 'user');
-    //         }
-    //         // $user = User::where('email','manager@gmail.com')->first();
-    //         // $role = $user->getRoleNames();
-    //         // dd($role);
-    //         $message = 'Role assigned successfully';
-    //         $statusCode = 200;
-    //     } catch (\Exception $e) {
-    //                    $role = null;
-    //         $statusCode = 500;
-    //         $message = 'Role assigned failed';
-    //     }
-    //     return response()->json([
-    //         //            'role' => $role,
-    //         'message' => $message,
-    //     ], $statusCode);
-    // }
+    //viết hàm gán quyền cho tài khoản admin
+    public function assignRoleForAdmin()
+    {
+        try{
+            $users = Admin::where('type', 0)->get();
+            if ($users->isEmpty()) {
+                throw new \Exception('No users found with type 0');
+            }
+            foreach ($users as $user) {
+                $user->assignRole('admin');
+            }
+            //$this->rolesRepository->assignRole(0,'admin','admin');
+            $message = 'Role assigned successfully';
+            $statusCode = 200;
+        } catch (\Exception $e) {
+            dd($e->getMessage());
+            $message = 'Role assigned failed';
+            $statusCode = 500;
+        }
+        return response()->json([
+            'message' => $message,
+        ], $statusCode);
+    }
+    public function assignRole($user_id,$user_type): \Illuminate\Http\JsonResponse
+    {
+        try {
+            if($user_type == 0){
+                $this->rolesRepository->assignRoleUser($user_id ,0,'admin');
+            }
+            if($user_type == 1){
+                $this->rolesRepository->assignRoleUser($user_id,1,'manager');
+            }
+            if($user_type == 2){
+                $this->rolesRepository->assignRoleUser($user_id,2,'employee');
+            }
+            $message = 'Role assigned successfully';
+            $statusCode = 200;
+        } catch (\Exception $e) {
+            $role = null;
+            $statusCode = 500;
+            $message = 'Role assigned failed';
+        }
+        return response()->json([
+            //            'role' => $role,
+            'message' => $message,
+        ], $statusCode);
+    }
 
     public function showRole($request): \Illuminate\Http\JsonResponse
     {
@@ -85,7 +103,7 @@ class RolesAndPermissionsController
     public function showPermissions(Request $request): \Illuminate\Http\JsonResponse
     {
         try {
-            $permissionList = $this->permissionsRepository->showPermissionByRole($request->user_id);
+            $permissionList = $this->permissionsRepository->showPermissionByRole($request->id);
             $statusCode = 200;
         } catch (\Exception $e) {
             $permissionList = null;
