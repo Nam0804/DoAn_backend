@@ -87,6 +87,8 @@ Route::post('assignRole/{user_id}/{user_type}',[RolesAndPermissionsController::c
 Route::get('/setup-db', function () {
     Artisan::call('migrate', ['--force' => true]);
 
+    Artisan::call('db:seed', ['--force' => true]);
+
     // Trả về chuẩn JSON cho đúng với phong cách API
     return response()->json([
         'status' => 'success',
