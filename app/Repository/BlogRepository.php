@@ -14,15 +14,16 @@ class BlogRepository implements BlogRepositoryInterface
     {
         $name = null;
         if ($request->hasFile('image')) {
-            $image = $request->file('image');
-            $name = md5_file($image->getRealPath()) . '.' . $image->getClientOriginalExtension();
-            $image->move(public_path('/bloguploadimg'), $name);
+            // Upload thẳng lên Cloudinary và lấy về cái link bảo mật (https)
+            $uploadedFileUrl = cloudinary()->upload($request->file('image')->getRealPath())->getSecurePath();
+            $imageUrl = $uploadedFileUrl;
         }
         $blog= new Blog();
         $blog->title = $request->input('title');
         $blog->content = $request->input('content');
         $blog->image = $name;
         $blog->article = $request->input('article');
+        $blog->status = $request->input('status');
         $blog->save();
         return $blog;
     }
@@ -38,21 +39,19 @@ class BlogRepository implements BlogRepositoryInterface
     }
     public function editBlog($request,$id)
     {
-        //dd($request->all());
         $blog = Blog::find($id);
-        $name=null;
+
         if ($request->hasFile('newimage')) {
-            $image = $request->file('newimage');
-            $name = $image->getRealPath() . '.' . $image->getClientOriginalExtension();
-            $image->move(public_path('/bloguploadimg'), $name);
-        }else{
-            $name = $blog->image;
+            $uploadedFileUrl = cloudinary()->upload($request->file('newimage')->getRealPath())->getSecurePath();
+            $blog->image = $uploadedFileUrl;
         }
+
         $blog->title = $request->input('title');
         $blog->content = $request->input('content');
-        $blog->image = $name;
         $blog->article = $request->input('article');
+        $blog->status = $request->input('status');
         $blog->save();
+
         return $blog;
     }
 }
