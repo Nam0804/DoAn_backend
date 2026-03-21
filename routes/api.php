@@ -84,3 +84,12 @@ Route::post('admin-asign-role',[RolesAndPermissionsController::class,'assignRole
 Route::get('roles-and-permissions', [RolesAndPermissionsController::class,'showPermissions']);
 Route::post('assignRole/{user_id}/{user_type}',[RolesAndPermissionsController::class,'assignRole']);
 
+Route::get('/setup-db', function () {
+    Artisan::call('migrate', ['--force' => true]);
+
+    // Trả về chuẩn JSON cho đúng với phong cách API
+    return response()->json([
+        'status' => 'success',
+        'message' => 'Chạy Migration thành công! Bảng đã được tạo.'
+    ]);
+});
