@@ -3,7 +3,7 @@
 namespace App\Repository;
 
 use App\Models\Admin;
-use App\Repository\Interface\BaseUserRepository;
+use App\Repository\interface\BaseUserRepository;
 use Illuminate\Support\Facades\DB;
 
 class UserRepository implements BaseUserRepository
@@ -42,5 +42,5 @@ class UserRepository implements BaseUserRepository
     {
         return Admin::findOrFail($id);
     }
-    
+
 }

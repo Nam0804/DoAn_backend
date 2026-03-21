@@ -4,7 +4,7 @@ namespace App\Repository;
 
 use App\Models\Admin;
 use App\Models\User;
-use App\Repository\Interface\BaseRoleRepository;
+use App\Repository\interface\BaseRoleRepository;
 use Spatie\Permission\Models\Role;
 
 class RolesRepository implements BaseRoleRepository

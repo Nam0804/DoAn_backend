@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Repository\Interface;
+namespace App\Repository\interface;
 interface BasePermissionsRepository
 {
     public function index();

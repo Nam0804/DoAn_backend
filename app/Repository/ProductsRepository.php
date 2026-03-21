@@ -3,7 +3,7 @@
 namespace App\Repository;
 
 use App\Models\Base;
-use App\Repository\Interface\ProductRepositoryInterface;
+use App\Repository\interface\ProductRepositoryInterface;
 use App\Models\Product;
 use App\Models\ProductBorder;
 use App\Models\ProductMeat;

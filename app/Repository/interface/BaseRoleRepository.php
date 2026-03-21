@@ -1,5 +1,5 @@
 <?php
-namespace App\Repository\Interface;
+namespace App\Repository\interface;
 interface BaseRoleRepository
 {
     public function index();

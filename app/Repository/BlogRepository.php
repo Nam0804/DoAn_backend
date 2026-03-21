@@ -4,7 +4,7 @@ namespace App\Repository;
 
 use App\Models\Blog;
 use App\Models\Category;
-use App\Repository\Interface\BlogRepositoryInterface;
+use App\Repository\interface\BlogRepositoryInterface;
 use App\Repository\interface\CategoryRepositoryInterface;
 use Illuminate\Support\Facades\Request;
 

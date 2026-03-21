@@ -4,7 +4,7 @@ namespace App\Repository;
 
 use App\Models\Admin;
 use App\Models\User;
-use App\Repository\Interface\BasePermissionsRepository;
+use App\Repository\interface\BasePermissionsRepository;
 use Spatie\Permission\Models\Role;
 use Spatie\Permission\Models\Permission;
 
