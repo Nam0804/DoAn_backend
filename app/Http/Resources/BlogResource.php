@@ -12,7 +12,7 @@ class BlogResource extends JsonResource
             'content' => $this->content,
             'article' => $this->article,
             'created_at' => $this->created_at,
-            'image' => asset('bloguploadimg/' . $this->image),
+            'image' => $this->image,
         ];
     }
 }
