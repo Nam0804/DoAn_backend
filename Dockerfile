@@ -3,19 +3,20 @@ FROM php:8.2-apache
 
 # Cài đặt các thư viện hệ thống cần thiết
 RUN apt-get update && apt-get install -y \
-    libpng-dev \
-    libonig-dev \
-    libxml2-dev \
-    zip \
-    unzip \
-    git \
-    curl
+libpng-dev \
+libonig-dev \
+libxml2-dev \
+libpq-dev \
+zip \
+unzip \
+git \
+curl
 
 # Xóa cache apt-get để giảm dung lượng image
 RUN apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Cài đặt các extension PHP cần thiết cho Laravel
-RUN docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd
+RUN docker-php-ext-install pdo_mysql pdo_pgsql mbstring exif pcntl bcmath gd
 
 # Bật rewrite module của Apache (quan trọng cho route Laravel)
 RUN a2enmod rewrite
