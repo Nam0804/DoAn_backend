@@ -11,22 +11,24 @@ use Illuminate\Support\Facades\Request;
 class BlogRepository implements BlogRepositoryInterface
 {
     public function createBlog($request)
-    {
-        $name = null;
-        if ($request->hasFile('image')) {
-            // Upload thẳng lên Cloudinary và lấy về cái link bảo mật (https)
-            $uploadedFileUrl = cloudinary()->upload($request->file('image')->getRealPath())->getSecurePath();
-            $imageUrl = $uploadedFileUrl;
-        }
-        $blog= new Blog();
-        $blog->title = $request->input('title');
-        $blog->content = $request->input('content');
-        $blog->image = $name;
-        $blog->article = $request->input('article');
-        $blog->status = $request->input('status');
-        $blog->save();
-        return $blog;
+{
+    $imageUrl = null; // Khởi tạo biến này
+
+    if ($request->hasFile('image')) {
+        // Upload và gán thẳng vào $imageUrl
+        $imageUrl = cloudinary()->upload($request->file('image')->getRealPath())->getSecurePath();
     }
+
+    $blog = new Blog();
+    $blog->title = $request->input('title');
+    $blog->content = $request->input('content');
+    $blog->image = $imageUrl; // <-- Dùng đúng biến $imageUrl đã có link Cloudinary
+    $blog->article = $request->input('article');
+    $blog->status = $request->input('status', '0'); // Mặc định là 0 nếu không có
+    $blog->save();
+
+    return $blog;
+}
     public function getBlogs()
     {
         $blogs = Blog::all();
@@ -37,21 +39,22 @@ class BlogRepository implements BlogRepositoryInterface
         $blog = Blog::find($id);
         return $blog;
     }
-    public function editBlog($request,$id)
-    {
-        $blog = Blog::find($id);
+    public function editBlog($request, $id)
+{
+    $blog = Blog::find($id);
 
-        if ($request->hasFile('newimage')) {
-            $uploadedFileUrl = cloudinary()->upload($request->file('newimage')->getRealPath())->getSecurePath();
-            $blog->image = $uploadedFileUrl;
-        }
-
-        $blog->title = $request->input('title');
-        $blog->content = $request->input('content');
-        $blog->article = $request->input('article');
-        $blog->status = $request->input('status');
-        $blog->save();
-
-        return $blog;
+    if ($request->hasFile('newimage')) {
+        // Sửa tương tự cho đồng bộ
+        $imageUrl = cloudinary()->upload($request->file('newimage')->getRealPath())->getSecurePath();
+        $blog->image = $imageUrl;
     }
+
+    $blog->title = $request->input('title');
+    $blog->content = $request->input('content');
+    $blog->article = $request->input('article');
+    $blog->status = $request->input('status', $blog->status);
+    $blog->save();
+
+    return $blog;
+}
 }
