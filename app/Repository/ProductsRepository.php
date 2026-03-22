@@ -50,68 +50,83 @@ class ProductsRepository implements ProductRepositoryInterface
     }
     public function storeProduct($request)
     {
-        try{
-        $name = null;
-        if ($request->hasFile('image')) {
-            $image = $request->file('image');
-            $name = rand() . '.' . $image->getClientOriginalExtension();
-            $image->move(public_path('/productimg'), $name);
-        }
-        $product = new Product();
-        $product->name = $request->input('name');
-        $product->description = $request->input('description');
-        $product->category_id = $request->input('category_id');
-        $product->type_id = $request->input('type_id');
-        $product->price = $request->input('price');
-        $product->image = $name;
-        $product->save();
-        //thông tin của sp mới thêm
-        $productId = $product->id;
-        if ($request->has('meats') && $request->input('meats') != null) {
-            $meats = json_decode($request->input('meats'), true);
-            foreach ($meats as $meatId) {
-                ProductMeat::create([
-                    'product_id' => $productId,
-                    'meat_id' => $meatId,
-                ]);
+        try {
+            $imageUrl = null;
+            // 1. UPLOAD ẢNH LÊN CLOUDINARY
+            if ($request->hasFile('image')) {
+                $imageUrl = cloudinary()->upload($request->file('image')->getRealPath())->getSecurePath();
             }
-        }
-        if($request->has('topping_list') && $request->input('topping_list') != null){
-            $toppingList = json_decode($request->input('topping_list'), true);
-            foreach ($toppingList as $topping) {
-                ProductTopping::create([
-                    'product_id' => $productId,
-                    'topping_id' => $topping['topping'],
-                    'size_id' => $topping['size'],
-                    'price' => $topping['price'],
-                ]);
+
+            $product = new Product();
+            $product->name = $request->input('name');
+            $product->description = $request->input('description');
+            $product->category_id = $request->input('category_id');
+            $product->type_id = $request->input('type_id');
+            // Nếu không có giá (ví dụ Pizza dùng giá theo size), gán mặc định là 0 để không bị lỗi DB
+            $product->price = $request->input('price') ?: 0;
+            $product->image = $imageUrl; // Lưu link Cloudinary
+            $product->status = $request->input('status', '1'); // Cập nhật luôn trạng thái
+            $product->save();
+
+            $productId = $product->id;
+
+            // Xử lý nguyên liệu
+            if ($request->has('meats') && $request->input('meats') != null) {
+                $meats = json_decode($request->input('meats'), true);
+                foreach ($meats as $meatId) {
+                    ProductMeat::create([
+                        'product_id' => $productId,
+                        'meat_id' => $meatId,
+                    ]);
+                }
             }
-        }
-        if($request->has('border_list') && $request->input('border_list') != null){
-            $borderList = json_decode($request->input('border_list'), true);
-            foreach ($borderList as $border) {
-                ProductBorder::create([
-                    'product_id' => $productId,
-                    'border_id' => $border['border'],
-                    'size_id' => $border['size'],
-                    'price' => $border['price'],
-                ]);
+
+            // Xử lý Topping
+            if($request->has('topping_list') && $request->input('topping_list') != null){
+                $toppingList = json_decode($request->input('topping_list'), true);
+                foreach ($toppingList as $topping) {
+                    ProductTopping::create([
+                        'product_id' => $productId,
+                        'topping_id' => $topping['topping'],
+                        'size_id' => $topping['size'],
+                        'price' => $topping['price'],
+                    ]);
+                }
             }
-        }
-        if($request->has('size_list') && $request->input('size_list') != null){
-            $sizeList = json_decode($request->input('size_list'), true);
-            foreach ($sizeList as $size) {
-                ProductSize::create([
-                    'product_id' => $productId,
-                    'size_id' => $size['size'],
-                    'price' => $size['price'],
-                ]);
+
+            // Xử lý Viền
+            if($request->has('border_list') && $request->input('border_list') != null){
+                $borderList = json_decode($request->input('border_list'), true);
+                foreach ($borderList as $border) {
+                    ProductBorder::create([
+                        'product_id' => $productId,
+                        'border_id' => $border['border'],
+                        'size_id' => $border['size'],
+                        'price' => $border['price'],
+                    ]);
+                }
             }
-        }
-        return $product;
-        }catch(\Exception $e){
-            dd($e);
-            return $e;
+
+            // Xử lý Size
+            if($request->has('size_list') && $request->input('size_list') != null){
+                $sizeList = json_decode($request->input('size_list'), true);
+                foreach ($sizeList as $size) {
+                    ProductSize::create([
+                        'product_id' => $productId,
+                        // ✅ ĐÃ SỬA LỖI Ở ĐÂY: Sửa 'size' thành 'size_id' cho khớp với Frontend
+                        'size_id' => $size['size_id'],
+                        'price' => $size['price'],
+                    ]);
+                }
+            }
+
+            return $product;
+
+        } catch(\Exception $e) {
+            // Log lỗi ra file để dễ debug nếu có sự cố
+            \Log::error('Lỗi khi thêm sản phẩm: ' . $e->getMessage());
+            // Trả về lỗi 500 để Frontend hiển thị thông báo "Thêm thất bại"
+            return response()->json(['error' => $e->getMessage()], 500);
         }
     }
     public function deleteProduct($id)
