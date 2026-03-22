@@ -19,6 +19,7 @@ class ProductResource extends JsonResource
             'type_of_meats' => $this->type_of_meats->pluck('name'),
             'type_id' => $this->type ? $this->type->id : null,
             'type_name' => $this->type ? $this->type->name : null,
+            'status' => $this->status,
             'sizes' => $this->sizes->map(function ($size) {
                 return [
                     'id' => $size ? $size->id :null,
